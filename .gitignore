@@ -1,0 +1,28 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+credentials/
+**/credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+.vite/
+
+# Logs
+*.log
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db

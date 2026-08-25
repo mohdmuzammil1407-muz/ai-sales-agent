@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vidio Widget E2E Test</title>
+  <style>
+    body { 
+      background: #0f0f0f; 
+      font-family: sans-serif;
+      color: white;
+      padding: 40px;
+    }
+    .status { 
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .ok  { background: #14532d; }
+    .err { background: #7f1d1d; }
+  </style>
+  <link rel="stylesheet" href="/widget.css">
+</head>
+<body>
+  <h2>Vidio Widget — E2E Test Page</h2>
+  <div id="status"></div>
+
+  <script>
+    const log = (msg, ok) => {
+      const el = document.createElement('div')
+      el.className = 'status ' + (ok ? 'ok' : 'err')
+      el.textContent = (ok ? '✅ ' : '❌ ') + msg
+      document.getElementById('status').appendChild(el)
+    }
+    
+    window.onerror = (e) => log('JS Error: ' + e, false)
+    log('Page loaded', true)
+  </script>
+
+  <!-- Widget embed — update src to actual URL -->
+  <script 
+    src="/widget.js" 
+    data-api-url="http://localhost:8000"
+    onload="log('widget.js loaded', true)"
+    onerror="log('widget.js FAILED to load — check src URL', false)">
+  </script>
+</body>
+</html>

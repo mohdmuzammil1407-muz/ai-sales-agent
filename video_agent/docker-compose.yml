@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: vidio-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres1
+      POSTGRES_DB: vidio_agent
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vidio_agent"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vidio-backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+    # Use ONLY ONE of these (recommended: env_file)
+    env_file:
+      - .env
+
+    # Remove DATABASE_URL from .env OR remove below block
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres1@db:5432/vidio_agent
+
+    volumes:
+      - .:/app
+
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data:

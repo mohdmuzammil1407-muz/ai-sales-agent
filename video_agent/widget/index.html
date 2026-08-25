@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vidio Widget Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Syne:wght@600;700;800&display=swap"
+    rel="stylesheet">
+  <link id="vidio-widget-styles" rel="stylesheet" href="widget.css">
+  <style>
+    :root {
+      color-scheme: dark;
+      --page-bg: #08080d;
+      --panel: rgba(255, 255, 255, 0.04);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f5f7fb;
+      --text-muted: #bbc1d3;
+      --text-subtle: #8d93a6;
+      --purple-1: #7c3aed;
+      --purple-2: #a855f7;
+      --glow: rgba(124, 58, 237, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(124, 58, 237, 0.2), transparent 25%),
+        radial-gradient(circle at left center, rgba(59, 130, 246, 0.08), transparent 24%),
+        linear-gradient(180deg, #0a0a10 0%, #08080d 100%);
+      color: var(--text-main);
+      font-family: "DM Sans", sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .preview-note {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 14px 18px;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 0.03em;
+      color: #efe7ff;
+      background: rgba(124, 58, 237, 0.18);
+      border-bottom: 1px solid rgba(168, 85, 247, 0.26);
+      backdrop-filter: blur(10px);
+    }
+
+    .site-shell {
+      width: min(1160px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 28px 0 20px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: "Syne", sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--purple-1), var(--purple-2));
+      box-shadow: 0 12px 26px var(--glow);
+      font-size: 18px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .nav-auth {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .vidio-auth-show-logged-in {
+      display: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      align-items: stretch;
+      padding: 28px 0 20px;
+    }
+
+    .hero-copy,
+    .hero-aside,
+    .feature-card,
+    .footer {
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-copy {
+      padding: 42px;
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at top right, rgba(124, 58, 237, 0.18), transparent 32%),
+        linear-gradient(180deg, rgba(19, 19, 28, 0.96), rgba(11, 11, 18, 0.96));
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: #d8c6ff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-family: "Syne", sans-serif;
+      font-size: clamp(42px, 7vw, 74px);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      max-width: 760px;
+    }
+
+    .hero-subtitle {
+      max-width: 700px;
+      margin: 0 0 28px;
+      color: var(--text-muted);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 34px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      padding: 14px 22px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple-1), var(--purple-2));
+      color: #fff;
+      box-shadow: 0 14px 32px var(--glow);
+      border: 0;
+    }
+
+    .btn-secondary {
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .metric {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 20px;
+    }
+
+    .metric span {
+      color: var(--text-subtle);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .hero-aside {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 28px;
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.12), transparent 30%),
+        linear-gradient(180deg, rgba(17, 17, 25, 0.96), rgba(10, 10, 16, 0.96));
+    }
+
+    .aside-card-title {
+      margin: 0 0 10px;
+      font-family: "Syne", sans-serif;
+      font-size: 28px;
+      line-height: 1.05;
+    }
+
+    .aside-copy {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .aside-list {
+      display: grid;
+      gap: 12px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .aside-list li {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .aside-list strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text-main);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      padding: 20px 0 36px;
+    }
+
+    .feature-card {
+      padding: 24px;
+      border-radius: 24px;
+    }
+
+    .feature-card h2 {
+      margin: 0 0 12px;
+      font-family: "Syne", sans-serif;
+      font-size: 22px;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .footer {
+      margin-bottom: 120px;
+      padding: 22px 24px;
+      border-radius: 24px;
+      color: var(--text-subtle);
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 980px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .site-shell {
+        width: min(100% - 24px, 1160px);
+      }
+
+      .nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .hero-copy,
+      .hero-aside {
+        padding: 26px;
+      }
+
+      .hero-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .footer {
+        margin-bottom: 96px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="preview-note">Widget Preview &mdash; Backend must be running on port 8000</div>
+
+  <div class="site-shell">
+    <header class="nav">
+      <a class="logo" href="#">
+        <span class="logo-mark">🎬</span>
+        <span>Ilmora Studios</span>
+      </a>
+
+      <div class="nav-right">
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#">Services</a>
+          <a href="#">Packages</a>
+          <a href="#">Case Studies</a>
+          <a href="#">Contact</a>
+        </nav>
+
+        <div class="nav-auth">
+          <button class="btn-nav-signin vidio-auth-show-logged-out" onclick="VidioAuth.openModal('signin')"
+            type="button">
+            Sign In
+          </button>
+          <button class="btn-nav-getstarted vidio-auth-show-logged-out" onclick="VidioAuth.openModal('getstarted')"
+            type="button">
+            Get Started
+          </button>
+
+          <div class="vidio-nav-user vidio-auth-show-logged-in" style="display:none">
+            <span class="vidio-nav-avatar">👤</span>
+            <div class="vidio-nav-user-info">
+              <span class="vidio-user-display-name"></span>
+              <span class="vidio-user-auth-badge"></span>
+            </div>
+          </div>
+          <button class="btn-nav-logout vidio-auth-show-logged-in" style="display:none" onclick="VidioAuth.logout()"
+            type="button">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">AI-Powered Creative Studio</span>
+          <h1>Build cinematic brand stories with faster strategy, sharper concepts, and a smarter production flow.</h1>
+          <p class="hero-subtitle">
+            Ilmora Studios helps founders, restaurants, ecommerce teams, and modern brands turn creative direction
+            into polished video campaigns. This page previews the Vidio chat widget in a realistic site layout.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn-primary" href="#">Book a Strategy Call</a>
+            <a class="btn-secondary" href="#">View Showreel</a>
+          </div>
+
+          <div class="hero-metrics">
+            <div class="metric">
+              <strong>30-60s</strong>
+              <span>Short-form campaign films shaped for modern platforms.</span>
+            </div>
+            <div class="metric">
+              <strong>AI + Direction</strong>
+              <span>Creative discovery and package matching in one flow.</span>
+            </div>
+            <div class="metric">
+              <strong>Fast Qualification</strong>
+              <span>Lead capture, consultation, and next-step guidance.</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-aside">
+          <div>
+            <h2 class="aside-card-title">Preview the full Vidio embed experience.</h2>
+            <p class="aside-copy">
+              The widget is designed to sit naturally inside a premium dark-themed website while connecting directly
+              to the backend conversation API.
+            </p>
+          </div>
+
+          <ul class="aside-list">
+            <li>
+              <strong>Identity-aware</strong>
+              Member login, OTP onboarding, and guest browsing all flow into the same chat experience.
+            </li>
+            <li>
+              <strong>Sales-focused</strong>
+              Package recommendation, objection handling, and quote capture are built in.
+            </li>
+            <li>
+              <strong>Embeddable</strong>
+              Configure the API endpoint and assistant branding through script data attributes.
+            </li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="features">
+        <article class="feature-card">
+          <h2>Campaign Films</h2>
+          <p>Story-led visual launches for product drops, restaurant promos, and premium social ad concepts.</p>
+        </article>
+        <article class="feature-card">
+          <h2>Creative Direction</h2>
+          <p>Use Vidio to shape mood, style, audience fit, timeline, and package recommendations before production.</p>
+        </article>
+        <article class="feature-card">
+          <h2>Scalable Delivery</h2>
+          <p>From launch assets to recurring short-form edits, built to adapt across formats and platforms.</p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Vidio widget preview for Ilmora Studios.</span>
+      <span>Update the script tag data attributes below when moving from local preview to production deployment.</span>
+    </footer>
+  </div>
+
+  <div id="vidio-auth-modal" class="vidio-modal-overlay" style="display:none">
+    <div class="vidio-modal-box">
+      <button class="vidio-modal-close" onclick="VidioAuth.closeModal()" type="button">✕</button>
+
+      <div class="vidio-auth-panel" id="vidio-panel-selector">
+        <div class="vidio-modal-brand">
+          <span class="vidio-modal-logo">🎬</span>
+          <span class="vidio-modal-brand-name">Ilmora Studios</span>
+        </div>
+        <h2>How would you like to continue?</h2>
+        <p class="vidio-modal-sub">Choose the option that works best for you</p>
+
+        <div class="vidio-method-list">
+          <button class="vidio-method-card" onclick="VidioAuth.showPanel('vidio-panel-signin')" type="button">
+            <span class="vidio-method-icon">🔑</span>
+            <div class="vidio-method-text">
+              <strong>Sign In</strong>
+              <span>Use your email or phone with password</span>
+            </div>
+            <span class="vidio-method-arrow">→</span>
+          </button>
+
+          <button class="vidio-method-card vidio-method-card--accent"
+            onclick="VidioAuth.showPanel('vidio-panel-getstarted')" type="button">
+            <span class="vidio-method-icon">✨</span>
+            <div class="vidio-method-text">
+              <strong>Get Started</strong>
+              <span>New here? Verify with a one-time code</span>
+            </div>
+            <span class="vidio-method-arrow">→</span>
+          </button>
+
+          <button class="vidio-method-card vidio-method-card--ghost" onclick="VidioAuth.continueAsGuest()"
+            type="button">
+            <span class="vidio-method-icon">👁️</span>
+            <div class="vidio-method-text">
+              <strong>Browse as Guest</strong>
+              <span>Explore first, create an account later</span>
+            </div>
+            <span class="vidio-method-arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="vidio-auth-panel" id="vidio-panel-signin" style="display:none">
+        <button class="vidio-back-btn" onclick="VidioAuth.showPanel('vidio-panel-selector')" type="button">
+          ← Back
+        </button>
+        <h2>Sign In</h2>
+        <p class="vidio-modal-sub">Welcome back — enter your details below</p>
+
+        <div class="vidio-form-group">
+          <label>Email or Mobile Number</label>
+          <input type="text" id="vidio-signin-identifier" placeholder="you@example.com or +91 98765 43210">
+        </div>
+        <div class="vidio-form-group">
+          <label>Password</label>
+          <input type="password" id="vidio-signin-password" placeholder="••••••••">
+        </div>
+
+        <div class="vidio-form-error" id="vidio-signin-error" style="display:none"></div>
+
+        <button class="btn-primary vidio-modal-submit" id="vidio-signin-btn" type="button">
+          Sign In
+        </button>
+
+        <p class="vidio-modal-switch">
+          No account yet?
+          <a href="#" onclick="VidioAuth.showPanel('vidio-panel-getstarted'); return false;">
+            Get Started
+          </a>
+        </p>
+      </div>
+
+      <div class="vidio-auth-panel" id="vidio-panel-getstarted" style="display:none">
+        <button class="vidio-back-btn" onclick="VidioAuth.showPanel('vidio-panel-selector')" type="button">
+          ← Back
+        </button>
+        <h2>Get Started</h2>
+        <p class="vidio-modal-sub">
+          We'll send a one-time code to verify your identity
+        </p>
+
+        <div class="vidio-form-group">
+          <label>Your Name</label>
+          <input type="text" id="vidio-otp-name" placeholder="What should we call you?">
+        </div>
+        <div class="vidio-form-group">
+          <label>Email or Mobile Number</label>
+          <input type="text" id="vidio-otp-identifier" placeholder="you@example.com or +91 98765 43210">
+        </div>
+
+        <div class="vidio-form-error" id="vidio-otp-request-error" style="display:none"></div>
+
+        <button class="btn-primary vidio-modal-submit" id="vidio-otp-send-btn" type="button">
+          Send One-Time Code
+        </button>
+
+        <p class="vidio-modal-switch">
+          Already have an account?
+          <a href="#" onclick="VidioAuth.showPanel('vidio-panel-signin'); return false;">
+            Sign In
+          </a>
+        </p>
+      </div>
+
+      <div class="vidio-auth-panel" id="vidio-panel-otp-verify" style="display:none">
+        <button class="vidio-back-btn" onclick="VidioAuth.showPanel('vidio-panel-getstarted')" type="button">
+          ← Back
+        </button>
+        <h2>Enter Your Code</h2>
+        <p class="vidio-modal-sub" id="vidio-otp-sent-label">
+          We sent a code to your email / phone
+        </p>
+
+        <div class="vidio-otp-input-group">
+          <input type="text" class="vidio-otp-digit" maxlength="1" inputmode="numeric">
+          <input type="text" class="vidio-otp-digit" maxlength="1" inputmode="numeric">
+          <input type="text" class="vidio-otp-digit" maxlength="1" inputmode="numeric">
+          <input type="text" class="vidio-otp-digit" maxlength="1" inputmode="numeric">
+          <input type="text" class="vidio-otp-digit" maxlength="1" inputmode="numeric">
+          <input type="text" class="vidio-otp-digit" maxlength="1" inputmode="numeric">
+        </div>
+
+        <div class="vidio-form-error" id="vidio-otp-verify-error" style="display:none"></div>
+
+        <button class="btn-primary vidio-modal-submit" id="vidio-otp-verify-btn" type="button">
+          Verify & Continue
+        </button>
+
+        <p class="vidio-modal-switch">
+          Didn't receive it?
+          <a href="#" id="vidio-otp-resend-link">Resend code</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="widget.js" data-api-url="http://127.0.0.1:8000/api/v1/chat" data-agent-name="Vidio"
+    data-agent-subtitle="Ilmora Studios AI Assistant" data-agent-avatar="🎬" data-user-avatar="👤"
+    data-theme="dark"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var otpDigits = Array.prototype.slice.call(
+        document.querySelectorAll(".vidio-otp-digit")
+      );
+      var resendLink = document.getElementById("vidio-otp-resend-link");
+      var resendTimer = null;
+
+      function showError(id, message) {
+        var el = document.getElementById(id);
+        if (!el) {
+          return;
+        }
+        el.textContent = message;
+        el.style.display = "block";
+      }
+
+      function hideError(id) {
+        var el = document.getElementById(id);
+        if (!el) {
+          return;
+        }
+        el.textContent = "";
+        el.style.display = "none";
+      }
+
+      function resetOtpShake() {
+        otpDigits.forEach(function (input) {
+          input.classList.remove("vidio-otp-shake");
+          void input.offsetWidth;
+        });
+      }
+
+      function shakeOtp() {
+        resetOtpShake();
+        otpDigits.forEach(function (input) {
+          input.classList.add("vidio-otp-shake");
+        });
+      }
+
+      function startResendCountdown(seconds) {
+        if (!resendLink) {
+          return;
+        }
+
+        if (resendTimer) {
+          window.clearInterval(resendTimer);
+        }
+
+        var remaining = seconds;
+        resendLink.dataset.locked = "true";
+        resendLink.style.pointerEvents = "none";
+        resendLink.style.opacity = "0.55";
+        resendLink.textContent = "Resend in " + remaining + "s";
+
+        resendTimer = window.setInterval(function () {
+          remaining -= 1;
+          if (remaining <= 0) {
+            window.clearInterval(resendTimer);
+            resendTimer = null;
+            resendLink.dataset.locked = "false";
+            resendLink.style.pointerEvents = "auto";
+            resendLink.style.opacity = "1";
+            resendLink.textContent = "Resend code";
+            return;
+          }
+
+          resendLink.textContent = "Resend in " + remaining + "s";
+        }, 1000);
+      }
+
+      otpDigits.forEach(function (input, index) {
+        input.addEventListener("input", function () {
+          input.value = input.value.replace(/[^\d]/g, "").slice(0, 1);
+          if (input.value && otpDigits[index + 1]) {
+            otpDigits[index + 1].focus();
+          }
+        });
+
+        input.addEventListener("keydown", function (event) {
+          if (
+            event.key === "Backspace" &&
+            !input.value &&
+            otpDigits[index - 1]
+          ) {
+            otpDigits[index - 1].focus();
+          }
+
+          if (
+            event.key.length === 1 &&
+            !/[0-9]/.test(event.key) &&
+            !event.ctrlKey &&
+            !event.metaKey
+          ) {
+            event.preventDefault();
+          }
+        });
+      });
+
+      document
+        .getElementById("vidio-signin-btn")
+        .addEventListener("click", async function () {
+          var identifier = document.getElementById("vidio-signin-identifier").value.trim();
+          var password = document.getElementById("vidio-signin-password").value;
+          var button = document.getElementById("vidio-signin-btn");
+
+          hideError("vidio-signin-error");
+
+          if (!identifier || !password) {
+            showError("vidio-signin-error", "Please enter both your identifier and password.");
+            return;
+          }
+
+          button.textContent = "Signing in…";
+          button.disabled = true;
+
+          var result = await VidioAuth.login(identifier, password);
+          if (result.success) {
+            VidioAuth.closeModal();
+            return;
+          }
+
+          showError("vidio-signin-error", result.error || "Unable to sign in.");
+          button.textContent = "Sign In";
+          button.disabled = false;
+        });
+
+      document
+        .getElementById("vidio-otp-send-btn")
+        .addEventListener("click", async function () {
+          var name = document.getElementById("vidio-otp-name").value.trim();
+          var identifier = document.getElementById("vidio-otp-identifier").value.trim();
+          var button = document.getElementById("vidio-otp-send-btn");
+          var label = document.getElementById("vidio-otp-sent-label");
+
+          hideError("vidio-otp-request-error");
+
+          if (!name || !identifier) {
+            showError("vidio-otp-request-error", "Please enter your name and email or phone.");
+            return;
+          }
+
+          window._vidioOtpIdentifier = identifier;
+          window._vidioOtpName = name;
+
+          button.textContent = "Sending…";
+          button.disabled = true;
+
+          var result = await VidioAuth.requestOtp(identifier);
+          if (result.success) {
+            label.textContent = "We sent a 6-digit code to " + identifier;
+            VidioAuth.showPanel("vidio-panel-otp-verify");
+            startResendCountdown(30);
+            button.textContent = "Send One-Time Code";
+            button.disabled = false;
+            return;
+          }
+
+          showError("vidio-otp-request-error", result.error || "Could not send the code.");
+          button.textContent = "Send One-Time Code";
+          button.disabled = false;
+        });
+
+      document
+        .getElementById("vidio-otp-verify-btn")
+        .addEventListener("click", async function () {
+          var otp = otpDigits.map(function (input) {
+            return input.value.trim();
+          }).join("");
+          var button = document.getElementById("vidio-otp-verify-btn");
+
+          hideError("vidio-otp-verify-error");
+          resetOtpShake();
+
+          if (!/^\d{6}$/.test(otp)) {
+            showError("vidio-otp-verify-error", "Please enter the full 6-digit code.");
+            shakeOtp();
+            return;
+          }
+
+          button.textContent = "Verifying…";
+          button.disabled = true;
+
+          var result = await VidioAuth.verifyOtp(
+            window._vidioOtpIdentifier,
+            otp,
+            window._vidioOtpName
+          );
+
+          if (result.success) {
+            VidioAuth.closeModal();
+            window._vidioOtpIdentifier = null;
+            window._vidioOtpName = null;
+            return;
+          }
+
+          showError("vidio-otp-verify-error", result.error || "Invalid or expired OTP.");
+          shakeOtp();
+          button.textContent = "Verify & Continue";
+          button.disabled = false;
+        });
+
+      resendLink.addEventListener("click", async function (event) {
+        event.preventDefault();
+
+        if (resendLink.dataset.locked === "true" || !window._vidioOtpIdentifier) {
+          return;
+        }
+
+        await VidioAuth.requestOtp(window._vidioOtpIdentifier);
+        startResendCountdown(30);
+      });
+
+      document
+        .getElementById("vidio-auth-modal")
+        .addEventListener("click", function (event) {
+          if (event.target === event.currentTarget) {
+            VidioAuth.closeModal();
+          }
+        });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          VidioAuth.closeModal();
+        }
+      });
+    })();
+  </script>
+</body>
+
+</html>
